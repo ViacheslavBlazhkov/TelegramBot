@@ -1,0 +1,12 @@
+{
+    "require": {
+        "longman/telegram-bot": "*"
+    },
+    "config": {
+        "optimize-autoloader": true,
+		"prepend-autoloader": false,
+		"platform": {
+			"php": "8.2.*"
+		}
+    }
+}
