@@ -1,48 +1,56 @@
 <?php
+$update = json_decode(file_get_contents('php://input'), TRUE);
 
-ini_set('error_reporting', E_ALL);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+$botToken = "6294254865:AAFxKM1MYzYSnOOomAas0rRxwIXXihRpm5Q";
+$botAPI = "https://api.telegram.org/bot" . $botToken;
 
-$bot_token = "6294254865:AAFxKM1MYzYSnOOomAas0rRxwIXXihRpm5Q";
-$user_id = 721653619;
+// Check if callback is set
+if (isset($update['callback_query'])) {
 
-$update = file_get_contents('php://input');
-$updateArray = json_decode($update, true);
+    // Reply with callback_query data
+    $data = http_build_query([
+        'text' => 'Selected currency: ' . $update['callback_query']['data'].'
+        Enter nominal to transfer:',
+        'chat_id' => $update['callback_query']['from']['id']
+    ]);
+    if ($update['callback_query']['data'] == 'usd') {
+        /* ============================== */
+    } else if ($update['callback_query']['data'] == 'uah') {
+        /* ============================== */
+    } else if ($update['callback_query']['data'] == 'eur') {
+        /* ============================== */
+    }
+    file_get_contents($botAPI . "/sendMessage?{$data}");
+}
 
-// Перевіряємо, чи є повідомлення у вхідних даних
-if (isset($updateArray["message"])) {
-    // Отримуємо інформацію про повідомлення та користувача
-    $chatId = $updateArray["message"]["chat"]["id"];
-    $message = $updateArray["message"]["text"];
+// Check for normal command
+$msg = $update['message']['text'];
+if ($msg === "/start") {
 
-    if ($message == "/start") {
-        $data = http_build_query([
-            "chat_id" => $chatId,
-            "text" => 'Select your currency:'
-        ]);
-
-        $keyboard = json_encode([
-            'inline_keyboard' => [
+    // Create keyboard
+    $data = http_build_query([
+        'text' => 'Please select your currency:',
+        'chat_id' => $update['message']['from']['id']
+    ]);
+    $keyboard = json_encode([
+        "inline_keyboard" => [
+            [
                 [
-                    [
-                        'text' => 'UAH',
-                        'callback_data' => 'uah'
-                    ],
-                    [
-                        'text' => 'USD',
-                        'callback_data' => 'usd'
-                    ],
-                    [
-                        'text' => 'EUR',
-                        'callback_data' => 'eur'
-                    ]
+                    "text" => "UAH",
+                    "callback_data" => "uah"
+                ],
+                [
+                    "text" => "USD",
+                    "callback_data" => "usd"
+                ],
+                [
+                    "text" => "EUR",
+                    "callback_data" => "eur"
                 ]
             ]
-        ]);
-        file_get_contents("https://api.telegram.org/bot{$bot_token}/sendMessage?{$data}&reply_markup={$keyboard}");
-    } else {
-        $text = "Something";
-        file_get_contents("https://api.telegram.org/bot{$bot_token}/sendMessage?chat_id={$chatId}&text={$text}");
-    }
+        ]
+    ]);
+
+    // Send keyboard
+    file_get_contents($botAPI . "/sendMessage?{$data}&reply_markup={$keyboard}");
 }
